@@ -95,7 +95,7 @@ def train_classifier(clf, X_train, y_train):
     end = time()
 
     # Print the results
-    print "Trained model in {:.4f} seconds".format(end - start)
+    # print "Trained model in {:.4f} seconds".format(end - start)
     return end - start
 
 
@@ -108,7 +108,7 @@ def predict_labels(clf, features, target):
     end = time()
 
     # Print and return results
-    print "Made predictions in {:.4f} seconds.".format(end - start)
+    # print "Made predictions in {:.4f} seconds.".format(end - start)
     return f1_score(target.values, y_pred, pos_label='yes'), (end - start)
 
 
@@ -116,7 +116,7 @@ def train_predict(clf, X_train, y_train, X_test, y_test):
     ''' Train and predict using a classifer based on F1 score. '''
 
     # Indicate the classifier and the training set size
-    print "Training a {} using a training set size of {}. . .".format(clf.__class__.__name__, len(X_train))
+    # print "Training a {} using a training set size of {}. . .".format(clf.__class__.__name__, len(X_train))
 
     # Train the classifier
     training_time = train_classifier(clf, X_train, y_train)
@@ -124,8 +124,8 @@ def train_predict(clf, X_train, y_train, X_test, y_test):
     # Print the results of prediction for both training and testing
     training_f1, training_prediction_time = predict_labels(clf, X_train, y_train)
     test_f1, predict_time = predict_labels(clf, X_test, y_test)
-    print "F1 score for training set: {:.4f}.".format(training_f1)
-    print "F1 score for test set: {:.4f}.".format(test_f1)
+    # print "F1 score for training set: {:.4f}.".format(training_f1)
+    # print "F1 score for test set: {:.4f}.".format(test_f1)
     return {'train_time': training_time, 'predict_time': predict_time, 'f1_train': training_f1, 'f1_test': test_f1}
 
 
@@ -169,14 +169,19 @@ for item in results.items():
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
 
-parameters = {'n_neighbors': range(1, 20, 1),
-              'weights': ('uniform', 'distance'),
-              'algorithm': ('ball_tree', 'kd_tree', 'brute'),
-              'leaf_size': range(2, 18, 2),
-              'p': range(1, 2, 0.1)
+parameters = {'C': range(50, 100, 2),
+              'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+              'gamma': np.arange(1e-4, 1e-3, 0.0001)
               }
 
-clf = KNeighborsClassifier()
+# parameters = {'n_neighbors': range(8, 20, 1),
+#               'weights': ('uniform', 'distance'),
+#               'algorithm': ('ball_tree', 'kd_tree', 'brute'),
+#               'leaf_size': range(8, 12, 1),
+#               'p': (1, 1.25, 1.5, 1.75, 2)
+#               }
+
+clf = SVC()
 
 f1_scorer = make_scorer(f1_score, pos_label="yes")
 
@@ -188,6 +193,7 @@ grid_obj = grid_obj.fit(X_all, y_all)
 clf = grid_obj.best_estimator_
 
 print "Best Params : {}".format(grid_obj.best_params_)
+print "Best Score : {}".format(grid_obj.best_score_)
 
 # Report the final F1 score for training and testing after parameter tuning
 print "Tuned model has a training F1 score of {:.4f}.".format(predict_labels(clf, X_train, y_train)[0])
